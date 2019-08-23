@@ -14,13 +14,33 @@ variable "enable_nat_gateway" { default = false }
 variable "single_nat_gateway" { default = true }
 variable "create_database_subnet_group" { default = false }
 
+# Route53 hosted zones
 variable "domain_name" { default = "example.com" }
 variable "dns_public" { default = true }
 variable "domain_local" { default = "demo.local" }
 variable "dns_private" { default = true }
 
-variable "add_key_pair" { default = true }
-variable "ssh_public_key" { default = "~/.ssh/id_rsa.pub" }
+# SSH key
+variable "add_key_pair" {
+  description = "Should be true if you want to add ssh public key to the VPC"
+  default     = true 
+}
+
+variable "ssh_public_key" {
+  description = "The public key file path"
+  default     = "~/.ssh/id_rsa.pub"
+}
+
+# Endpoint vars:
+variable "enable_dynamodb_endpoint" {
+  description = "Should be true if you want to provision a DynamoDB endpoint to the VPC"
+  default     = false
+}
+
+variable "enable_s3_endpoint" {
+  description = "Should be true if you want to provision an S3 endpoint to the VPC"
+  default     = true
+}
 
 variable "tags" {
   default = {}

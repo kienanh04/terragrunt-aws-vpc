@@ -13,6 +13,7 @@ locals {
   common_tags = {
     Env = "${var.project_env}"
   }
+  vpc_name = "${var.vpc_name == "" ? "${var.project_env}-${var.project_name}" : "${var.vpc_name}" }"
 }
 
 ///////////////////////
@@ -23,8 +24,9 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "1.67.0"
 
-  name = "${var.vpc_name == "" ? "${var.project_env}-${var.project_name}" : "${var.vpc_name}" }"
+  name = "${local.vpc_name}"
   cidr = "${var.vpc_cidr}"
+  tags = "${merge(local.common_tags, var.tags)}"
 
   enable_dns_hostnames    = "${var.enable_dns_hostnames}"
   enable_dns_support      = "${var.enable_dns_support}"
@@ -47,20 +49,13 @@ module "vpc" {
 
   enable_dhcp_options              = true
   dhcp_options_domain_name         = "${var.domain_local}"
-  dhcp_options_domain_name_servers = ["AmazonProvidedDNS"]
+
   create_database_subnet_group     = "${var.create_database_subnet_group}"
 
-  tags = "${merge(local.common_tags, var.tags)}"
-
-}
-
-///////////////////////////////////
-//           Endpoint            //
-///////////////////////////////////
-resource "aws_vpc_endpoint" "s3" {
-  vpc_id          = "${module.vpc.vpc_id}"
-  service_name    = "com.amazonaws.${var.aws_region}.s3"
-  route_table_ids = ["${concat(module.vpc.private_route_table_ids,module.vpc.public_route_table_ids)}"]
+  # Endpoints:
+  enable_s3_endpoint       = "${var.enable_s3_endpoint}"
+  enable_dynamodb_endpoint = "${var.enable_dynamodb_endpoint}"
+  
 }
 
 ///////////////////////////////////

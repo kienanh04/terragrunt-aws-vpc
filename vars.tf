@@ -22,7 +22,6 @@ variable "azs" { default = [] }
 variable "num_of_public_subnets" { default = 2 }
 variable "num_of_private_subnets" { default = 2 }
 variable "num_of_database_subnets" { default = 3 }
-variable "num_of_azs" { default = 3 }
 variable "first_netnum" { default = 0 }
 
 # Route53 hosted zones

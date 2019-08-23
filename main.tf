@@ -31,7 +31,7 @@ resource "null_resource" "database_subnets" {
 }
 
 resource "null_resource" "azs" {
-  count    = "${length(var.azs) == "0" ? var.num_of_azs : 0}"
+  count    = "${length(var.azs) == "0" ? var.max_subnet_length : 0}"
   triggers = {
     az = "${element(data.aws_availability_zones.available.names,count.index)}"
   }
@@ -42,11 +42,12 @@ locals {
     Env = "${var.project_env}"
   }
 
-  vpc_name         = "${var.vpc_name == "" ? "${var.project_env}-${var.project_name}" : "${var.vpc_name}" }"
-  public_subnets   = "${compact(split(",", (length(var.public_subnets) == "0" ? join(",", null_resource.public_subnets.*.triggers.subnet) : join(",", var.public_subnets))))}"
-  private_subnets  = "${compact(split(",", (length(var.private_subnets) == "0" ? join(",", null_resource.private_subnets.*.triggers.subnet) : join(",", var.private_subnets))))}"
-  database_subnets = "${compact(split(",", (length(var.database_subnets) == "0" ? join(",", null_resource.database_subnets.*.triggers.subnet) : join(",", var.database_subnets))))}"
-  azs              = "${compact(split(",", (length(var.azs) == "0" ? join(",", null_resource.azs.*.triggers.az) : join(",", var.azs))))}"
+  vpc_name          = "${var.vpc_name == "" ? "${var.project_env}-${var.project_name}" : "${var.vpc_name}" }"
+  public_subnets    = "${compact(split(",", (length(var.public_subnets) == "0" ? join(",", null_resource.public_subnets.*.triggers.subnet) : join(",", var.public_subnets))))}"
+  private_subnets   = "${compact(split(",", (length(var.private_subnets) == "0" ? join(",", null_resource.private_subnets.*.triggers.subnet) : join(",", var.private_subnets))))}"
+  database_subnets  = "${compact(split(",", (length(var.database_subnets) == "0" ? join(",", null_resource.database_subnets.*.triggers.subnet) : join(",", var.database_subnets))))}"
+  max_subnet_length = "${max(length(local.public_subnets),length(local.private_subnets),length(local.database_subnets))}"
+  azs               = "${compact(split(",", (length(var.azs) == "0" ? join(",", null_resource.azs.*.triggers.az) : join(",", var.azs))))}"
 }
 
 ///////////////////////

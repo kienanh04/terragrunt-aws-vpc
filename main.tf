@@ -43,10 +43,10 @@ locals {
   }
 
   vpc_name         = "${var.vpc_name == "" ? "${var.project_env}-${var.project_name}" : "${var.vpc_name}" }"
-  public_subnets   = "${split(",", (length(var.public_subnets) == "0" ? join(",", null_resource.public_subnets.*.triggers.subnet) : join(",", var.public_subnets)))}"
-  private_subnets  = "${split(",", (length(var.private_subnets) == "0" ? join(",", null_resource.private_subnets.*.triggers.subnet) : join(",", var.private_subnets)))}"
-  database_subnets = "${split(",", (length(var.database_subnets) == "0" ? join(",", null_resource.database_subnets.*.triggers.subnet) : join(",", var.database_subnets)))}"
-  azs              = "${split(",", (length(var.azs) == "0" ? join(",", null_resource.azs.*.triggers.az) : join(",", var.azs)))}"
+  public_subnets   = "${compact(split(",", (length(var.public_subnets) == "0" ? join(",", null_resource.public_subnets.*.triggers.subnet) : join(",", var.public_subnets))))}"
+  private_subnets  = "${compact(split(",", (length(var.private_subnets) == "0" ? join(",", null_resource.private_subnets.*.triggers.subnet) : join(",", var.private_subnets))))}"
+  database_subnets = "${compact(split(",", (length(var.database_subnets) == "0" ? join(",", null_resource.database_subnets.*.triggers.subnet) : join(",", var.database_subnets))))}"
+  azs              = "${compact(split(",", (length(var.azs) == "0" ? join(",", null_resource.azs.*.triggers.az) : join(",", var.azs))))}"
 }
 
 ///////////////////////

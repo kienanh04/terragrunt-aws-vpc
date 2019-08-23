@@ -31,7 +31,7 @@ resource "null_resource" "database_subnets" {
 }
 
 resource "null_resource" "azs" {
-  count    = "${length(var.azs) == "0" ? var.max_subnet_length : 0}"
+  count    = "${length(var.azs) == "0" ? local.max_subnet_length : 0}"
   triggers = {
     az = "${element(data.aws_availability_zones.available.names,count.index)}"
   }

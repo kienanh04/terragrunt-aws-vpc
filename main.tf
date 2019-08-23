@@ -9,11 +9,44 @@ terraform {
 
 data "aws_availability_zones" "available" {}
 
+resource "null_resource" "public_subnets" {
+  count    = "${length(var.public_subnets) == "0" ? var.num_of_public_subnets : 0}"
+  triggers = {
+    subnet = "${cidrsubnet("${var.vpc_cidr}", var.newbits , count.index + var.first_netnum )}"
+  }
+}
+
+resource "null_resource" "private_subnets" {
+  count    = "${length(var.private_subnets) == "0" ? var.num_of_private_subnets : 0}"
+  triggers = {
+    subnet = "${cidrsubnet("${var.vpc_cidr}", var.newbits , count.index + var.num_of_public_subnets + var.first_netnum )}"
+  }
+}
+
+resource "null_resource" "database_subnets" {
+  count    = "${length(var.database_subnets) == "0" ? var.num_of_database_subnets : 0}"
+  triggers = {
+    subnet = "${cidrsubnet("${var.vpc_cidr}", var.newbits , count.index + var.num_of_public_subnets + var.num_of_private_subnets + var.first_netnum )}"
+  }
+}
+
+resource "null_resource" "azs" {
+  count    = "${length(var.azs) == "0" ? var.num_of_azs : 0}"
+  triggers = {
+    az = "${element(data.aws_availability_zones.available.names,count.index)}"
+  }
+}
+
 locals {
   common_tags = {
     Env = "${var.project_env}"
   }
-  vpc_name = "${var.vpc_name == "" ? "${var.project_env}-${var.project_name}" : "${var.vpc_name}" }"
+
+  vpc_name         = "${var.vpc_name == "" ? "${var.project_env}-${var.project_name}" : "${var.vpc_name}" }"
+  public_subnets   = "${split(",", (length(var.public_subnets) == "0" ? join(",", null_resource.public_subnets.*.triggers.subnet) : join(",", var.public_subnets)))}"
+  private_subnets  = "${split(",", (length(var.private_subnets) == "0" ? join(",", null_resource.private_subnets.*.triggers.subnet) : join(",", var.private_subnets)))}"
+  database_subnets = "${split(",", (length(var.database_subnets) == "0" ? join(",", null_resource.database_subnets.*.triggers.subnet) : join(",", var.database_subnets)))}"
+  azs              = "${split(",", (length(var.azs) == "0" ? join(",", null_resource.azs.*.triggers.az) : join(",", var.azs)))}"
 }
 
 ///////////////////////
@@ -35,22 +68,15 @@ module "vpc" {
   enable_nat_gateway      = "${var.enable_nat_gateway}"
   single_nat_gateway      = "${var.single_nat_gateway}"
 
-  azs                     = ["${data.aws_availability_zones.available.names[0]}",
-                             "${data.aws_availability_zones.available.names[1]}",
-                             "${data.aws_availability_zones.available.names[2]}"]
+  azs                     = ["${local.azs}"]
+  public_subnets          = ["${local.public_subnets}"]
+  private_subnets         = ["${local.private_subnets}"]
+  database_subnets        = ["${local.database_subnets}"]
 
-  public_subnets          = ["${cidrsubnet("${var.vpc_cidr}", 3, 1)}",
-                             "${cidrsubnet("${var.vpc_cidr}", 3, 2)}"]
-  private_subnets         = ["${cidrsubnet("${var.vpc_cidr}", 3, 3)}",
-                             "${cidrsubnet("${var.vpc_cidr}", 3, 4)}"]
-  database_subnets        = ["${cidrsubnet("${cidrsubnet("${var.vpc_cidr}", 3, 5)}", 2, 0)}",
-                             "${cidrsubnet("${cidrsubnet("${var.vpc_cidr}", 3, 5)}", 2, 1)}",
-                             "${cidrsubnet("${cidrsubnet("${var.vpc_cidr}", 3, 5)}", 2, 2)}"]
+  enable_dhcp_options          = true
+  dhcp_options_domain_name     = "${var.domain_local}"
 
-  enable_dhcp_options              = true
-  dhcp_options_domain_name         = "${var.domain_local}"
-
-  create_database_subnet_group     = "${var.create_database_subnet_group}"
+  create_database_subnet_group = "${var.create_database_subnet_group}"
 
   # Endpoints:
   enable_s3_endpoint       = "${var.enable_s3_endpoint}"

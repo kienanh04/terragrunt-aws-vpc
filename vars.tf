@@ -14,6 +14,17 @@ variable "enable_nat_gateway" { default = false }
 variable "single_nat_gateway" { default = true }
 variable "create_database_subnet_group" { default = false }
 
+variable "newbits" { default = 8 }
+variable "public_subnets" { default = [] }
+variable "private_subnets" { default = [] }
+variable "database_subnets" { default = [] }
+variable "azs" { default = [] }
+variable "num_of_public_subnets" { default = 2 }
+variable "num_of_private_subnets" { default = 2 }
+variable "num_of_database_subnets" { default = 3 }
+variable "num_of_azs" { default = 3 }
+variable "first_netnum" { default = 0 }
+
 # Route53 hosted zones
 variable "domain_name" { default = "example.com" }
 variable "dns_public" { default = true }

@@ -40,5 +40,5 @@ output "public_zone_id" {
 
 output "public_name_servers" {
   description = "The list NS records of the Route53 public zone"
-  value       = "${compact(concat(element(aws_route53_zone.public.*.name_servers,0),list("")))}"
+  value       = "${compact(concat(aws_route53_zone.public.*.name_servers,list("")))}"
 }

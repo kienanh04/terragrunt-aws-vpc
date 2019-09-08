@@ -108,6 +108,10 @@ resource "aws_route53_zone" "public" {
   tags = "${merge(local.common_tags, var.tags)}"
 }
 
+locals {
+  public_name_servers = "${concat(aws_route53_zone.public.*.name_servers,list(list("")))}"
+}
+
 ///////////////////////
 //       Keys        //
 ///////////////////////

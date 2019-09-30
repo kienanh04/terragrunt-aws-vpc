@@ -25,15 +25,20 @@ variable "num_of_database_subnets" { default = 3 }
 variable "first_netnum" { default = 0 }
 
 # Route53 hosted zones
-variable "domain_name" { default = "example.com" }
+variable "domain_names" { default = ["example.com"] }
 variable "dns_public" { default = true }
-variable "domain_local" { default = "demo.local" }
+variable "domain_locals" { default = ["demo.local"] }
 variable "dns_private" { default = true }
 
 # SSH key
 variable "add_key_pair" {
   description = "Should be true if you want to add ssh public key to the VPC"
   default     = true 
+}
+
+variable "customized_key_name" {
+  description = "The customized ssh key name to use"
+  default     = "" 
 }
 
 variable "ssh_public_key" {

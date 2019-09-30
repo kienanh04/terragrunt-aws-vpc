@@ -28,14 +28,14 @@ output "key_name" {
 
 
 # route53:
-output "private_zone_id" {
+output "private_zone_ids" {
   description = "The ID of the Route53 private zone"
-  value       = "${element(concat(aws_route53_zone.private.*.zone_id,list("")),0)}"
+  value       = "${coalescelist(aws_route53_zone.private.*.zone_id,list(""))}"
 }
 
-output "public_zone_id" {
+output "public_zone_ids" {
   description = "The ID of the Route53 public zone"
-  value       = "${element(concat(aws_route53_zone.public.*.zone_id,list("")),0)}"
+  value       = "${coalescelist(aws_route53_zone.public.*.zone_id,list(""))}"
 }
 
 output "public_name_servers" {

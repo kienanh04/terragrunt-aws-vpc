@@ -48,6 +48,7 @@ locals {
   database_subnets  = "${compact(split(",", (length(var.database_subnets) == "0" ? join(",", null_resource.database_subnets.*.triggers.subnet) : join(",", var.database_subnets))))}"
   max_subnet_length = "${max(length(local.public_subnets),length(local.private_subnets),length(local.database_subnets))}"
   azs               = "${compact(split(",", (length(var.azs) == "0" ? join(",", null_resource.azs.*.triggers.az) : join(",", var.azs))))}"
+  key_name          = "${var.customized_key_name == "" ? "${var.project_name}-${var.project_env}" : var.customized_key_name}"
 }
 
 ///////////////////////
@@ -89,8 +90,8 @@ module "vpc" {
 //            Route53            //
 ///////////////////////////////////
 resource "aws_route53_zone" "private" {
-  count   = "${var.dns_private ? 1 : 0}"
-  name    = "${var.domain_local}"
+  count   = "${var.dns_private ? length(var.domain_locals) : 0}"
+  name    = "${element(var.domain_locals,count.index)}"
   comment = "${var.project_name} Private Zone"
 
   vpc {
@@ -101,8 +102,8 @@ resource "aws_route53_zone" "private" {
 }
 
 resource "aws_route53_zone" "public" {
-  count   = "${var.dns_public ? 1 : 0}"
-  name    = "${var.domain_name}"
+  count   = "${var.dns_public ? length(var.domain_names) : 0}"
+  name    = "${element(var.domain_names,count.index)}"
   comment = "${var.project_name} Public Zone"
 
   tags = "${merge(local.common_tags, var.tags)}"
@@ -117,6 +118,6 @@ locals {
 ///////////////////////
 resource "aws_key_pair" "key_ssh" {
   count      = "${var.add_key_pair ? 1 : 0}"
-  key_name   = "${var.project_name}-${var.project_env}"
+  key_name   = "${local.key_name}"
   public_key = "${file("${var.ssh_public_key}")}"
 }

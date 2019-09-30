@@ -49,6 +49,7 @@ locals {
   max_subnet_length = "${max(length(local.public_subnets),length(local.private_subnets),length(local.database_subnets))}"
   azs               = "${compact(split(",", (length(var.azs) == "0" ? join(",", null_resource.azs.*.triggers.az) : join(",", var.azs))))}"
   key_name          = "${var.customized_key_name == "" ? "${var.project_name}-${var.project_env}" : var.customized_key_name}"
+  dhcp_options_domain_name = "${var.dns_private ? var.domain_locals[0] : ""}"
 }
 
 ///////////////////////
@@ -76,7 +77,7 @@ module "vpc" {
   database_subnets        = ["${local.database_subnets}"]
 
   enable_dhcp_options          = true
-  dhcp_options_domain_name     = "${var.domain_local}"
+  dhcp_options_domain_name     = "${local.dhcp_options_domain_name}"
 
   create_database_subnet_group = "${var.create_database_subnet_group}"
 

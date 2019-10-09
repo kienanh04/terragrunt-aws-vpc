@@ -38,6 +38,11 @@ output "public_zone_ids" {
   value       = "${coalescelist(aws_route53_zone.public.*.zone_id,list(""))}"
 }
 
+output "private_zone_id" {
+  description = "The ID of the 1st Route53 private zone"
+  value       = "${element(coalescelist(aws_route53_zone.private.*.zone_id,list("")),0)}"
+}
+
 output "public_name_servers" {
   description = "The list NS records of the Route53 public zone"
   value       = "${compact(local.public_name_servers[0])}" 

@@ -82,8 +82,8 @@ module "vpc" {
   create_database_subnet_group = "${var.create_database_subnet_group}"
 
   # Endpoints:
-  # enable_s3_endpoint       = "${var.enable_s3_endpoint}" 
-  # enable_dynamodb_endpoint = "${var.enable_dynamodb_endpoint}"
+   enable_s3_endpoint       = "${var.enable_s3_endpoint}" 
+   enable_dynamodb_endpoint = "${var.enable_dynamodb_endpoint}"
   
 }
 
